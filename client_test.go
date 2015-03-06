@@ -2,8 +2,8 @@ package chef
 
 import (
 	"fmt"
-  "os"
-  "testing"
+	"os"
+	"testing"
 )
 
 func TestClient(t *testing.T) {

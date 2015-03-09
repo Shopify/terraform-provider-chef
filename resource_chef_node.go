@@ -26,13 +26,11 @@ func resourceChefNode() *schema.Resource {
 			"environment": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 
 			"run_list": &schema.Schema{
 				Type:     schema.TypeList,
 				Required: true,
-				ForceNew: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},

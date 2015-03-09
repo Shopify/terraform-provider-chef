@@ -104,6 +104,8 @@ func resourceChefNodeUpdate(d *schema.ResourceData, meta interface{}) error {
 		NormalAttributes:    map[string]interface{}{},
 		DefaultAttributes:   map[string]interface{}{},
 		OverrideAttributes:  map[string]interface{}{},
+		ChefType:            "node",
+		JsonClass:           "Chef::Node",
   }
 
 	if attr, ok := d.GetOk("name"); ok {

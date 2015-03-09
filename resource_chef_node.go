@@ -52,11 +52,15 @@ func resourceChefNodeCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	node := chefGo.Node{
-		Name:        d.Get("name").(string),
-		Environment: d.Get("environment").(string),
-		ChefType:    "node",
-		JsonClass:   "Chef::Node",
-		RunList:     run_list,
+		Name:                d.Get("name").(string),
+		Environment:         d.Get("environment").(string),
+		AutomaticAttributes: map[string]interface{}{},
+		NormalAttributes:    map[string]interface{}{},
+		DefaultAttributes:   map[string]interface{}{},
+		OverrideAttributes:  map[string]interface{}{},
+		ChefType:            "node",
+		JsonClass:           "Chef::Node",
+		RunList:             run_list,
 	}
 
 	log.Printf("[DEBUG] node create configuration: %#v", node)

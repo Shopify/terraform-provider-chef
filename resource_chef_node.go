@@ -99,7 +99,12 @@ func resourceChefNodeRead(d *schema.ResourceData, meta interface{}) error {
 func resourceChefNodeUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*chefGo.Client)
 
-	updateNode := &chefGo.Node{}
+	updateNode := &chefGo.Node{
+		AutomaticAttributes: map[string]interface{}{},
+		NormalAttributes:    map[string]interface{}{},
+		DefaultAttributes:   map[string]interface{}{},
+		OverrideAttributes:  map[string]interface{}{},
+  }
 
 	if attr, ok := d.GetOk("name"); ok {
 		updateNode.Name = attr.(string)

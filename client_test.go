@@ -2,8 +2,8 @@ package chef
 
 import (
 	"fmt"
-  "os"
-  "testing"
+	"os"
+	"testing"
 )
 
 func TestClient(t *testing.T) {
@@ -17,9 +17,9 @@ func TestClient(t *testing.T) {
 		fmt.Println("Issue setting up client:", err)
 		os.Exit(1)
 	}
-  _, err = client.Nodes.List()
-  if err != nil {
-    fmt.Println("Can't output node list:", err)
-    os.Exit(1)
-  }
+	_, err = client.Nodes.List()
+	if err != nil {
+		fmt.Println("Can't output node list:", err)
+		os.Exit(1)
+	}
 }

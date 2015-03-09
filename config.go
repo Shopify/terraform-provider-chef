@@ -2,7 +2,7 @@ package chef
 
 import (
 	chefGo "github.com/go-chef/chef"
-	"io/ioutil"
+  "io/ioutil"
 )
 
 type Config struct {
@@ -12,15 +12,15 @@ type Config struct {
 }
 
 func (c *Config) Client() (*chefGo.Client, error) {
-	key, err := ioutil.ReadFile(c.Key)
-	if err != nil {
-		return nil, err
-	}
+  key, err := ioutil.ReadFile(c.Key)
+  if err != nil {
+    return nil, err
+  }
 	config := chefGo.Config{
 		Name:    c.Name,
 		Key:     string(key),
 		BaseURL: c.BaseURL,
-		SkipSSL: true,
+    SkipSSL: true,
 	}
 
 	return chefGo.NewClient(&config)

@@ -96,4 +96,42 @@ func resourceChefNodeRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceChefNodeUpdate(d *schema.ResourceData, meta interface{}) error {
   client := meta.(*chefGo.Client)
-  
+
+  updateNode := &chefGo.Node{}
+
+  if attr, ok := d.GetOk("name"); ok {
+    updateNode.Name = attr.(string)
+  }
+  if attr, ok := d.GetOk("environment"); ok {
+    updateNode.Environment = attr.(string)
+  }
+  if attr, ok := d.GetOk("run_list"); ok {
+    var run_list []string
+    if err := mapstructure.Decode(attr.(interface{}), &run_list); err != nil {
+      return err
+    }
+    updateNode.RunList = run_list
+  }
+
+  log.Printf("[DEBUG] node update configuration: %#v", updateNode)
+
+  _, err := client.Nodes.Put(*updateNode)
+  if err != nil {
+    return fmt.Errorf("Failed to update node: %s", err)
+  }
+
+  return resourceChefNodeRead(d, meta)
+}
+
+func resourceChefNodeDelete(d *schema.ResourceData, meta interface{}) error {
+  client := meta.(*chefGo.Client)
+
+  log.Printf("[INFO] Deleting node: %s", d.Id())
+
+  err := client.Nodes.Delete(d.Id())
+  if err != nil {
+    return fmt.Errorf("Error deleting node: %s", err)
+  }
+
+  return nil
+}

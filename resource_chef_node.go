@@ -106,7 +106,7 @@ func resourceChefNodeUpdate(d *schema.ResourceData, meta interface{}) error {
 		OverrideAttributes:  map[string]interface{}{},
 		ChefType:            "node",
 		JsonClass:           "Chef::Node",
-  }
+	}
 
 	if attr, ok := d.GetOk("name"); ok {
 		updateNode.Name = attr.(string)
@@ -142,10 +142,15 @@ func resourceChefNodeDelete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error deleting node: %s", err)
 	}
 
-  err = client.magicRequestDecoder("DELETE", "clients/"+d.Id(), nil, nil)
-  if err != nil {
-    return fmt.Errorf("Error deleting node: %s", err)
-  }
+	req, err = client.NewRequest("DELETE", "clients/"+d.Id(), nil)
+	if err != nil {
+		return fmt.Errorf("Request error: %s", err)
+	}
+
+	res, err := c.Do(req, nil)
+	if err != nil {
+		return fmt.Errorf("Error deleting client: %s", err)
+	}
 
 	return nil
 }

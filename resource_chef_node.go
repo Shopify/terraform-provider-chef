@@ -147,7 +147,7 @@ func resourceChefNodeDelete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Request error: %s", err)
 	}
 
-	_, err := client.Do(req, nil)
+	_, err = client.Do(req, nil)
 	if err != nil {
 		return fmt.Errorf("Error deleting client: %s", err)
 	}

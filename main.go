@@ -1,0 +1,12 @@
+package main
+
+import (
+  "github.com/rsyabuta/terraform-chef-provider/chef"
+  "github.com/hashicorp/terraform/plugin"
+)
+
+func main() {
+  plugin.Serve(&plugin.ServeOpts{
+    ProviderFunc: chef.Provider,
+  })
+}

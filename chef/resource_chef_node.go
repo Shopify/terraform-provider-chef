@@ -23,11 +23,6 @@ func resourceChefNode() *schema.Resource {
 				ForceNew: true,
 			},
 
-			"environment": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-
 			"run_list": &schema.Schema{
 				Type:     schema.TypeList,
 				Required: true,
@@ -35,12 +30,27 @@ func resourceChefNode() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+
+			"environment": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "master",
+			},
+
+			"attributes": &schema.Schema{
+				Type:     schema.TypeMap,
+				Optional: true,
+			},
 		},
 	}
 }
 
 func resourceChefNodeCreate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*chefGo.Client)
+
+	name := d.Get("name").(string)
+	environment := d.Get("environment").(string)
+	attributes := d.Get("attributes").(map[string]interface{})
 
 	var run_list []string
 	schema_run_list := d.Get("run_list").(interface{})
@@ -50,10 +60,10 @@ func resourceChefNodeCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	node := chefGo.Node{
-		Name:                d.Get("name").(string),
-		Environment:         d.Get("environment").(string),
+		Name:                name,
+		Environment:         environment,
+		NormalAttributes:    attributes,
 		AutomaticAttributes: map[string]interface{}{},
-		NormalAttributes:    map[string]interface{}{},
 		DefaultAttributes:   map[string]interface{}{},
 		OverrideAttributes:  map[string]interface{}{},
 		ChefType:            "node",
@@ -99,9 +109,11 @@ func resourceChefNodeRead(d *schema.ResourceData, meta interface{}) error {
 func resourceChefNodeUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*chefGo.Client)
 
+	attributes := d.Get("attributes").(map[string]interface{})
+
 	updateNode := &chefGo.Node{
+		NormalAttributes:    attributes,
 		AutomaticAttributes: map[string]interface{}{},
-		NormalAttributes:    map[string]interface{}{},
 		DefaultAttributes:   map[string]interface{}{},
 		OverrideAttributes:  map[string]interface{}{},
 		ChefType:            "node",
@@ -142,15 +154,18 @@ func resourceChefNodeDelete(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error deleting node: %s", err)
 	}
 
-	req, err := client.NewRequest("DELETE", "clients/"+d.Id(), nil)
-	if err != nil {
-		return fmt.Errorf("Request error: %s", err)
-	}
+	_, err = client.Clients.Get(d.Id())
+	if err == nil {
+		// This should check if the client actually exists before it tries to delete it
+		req, err := client.NewRequest("DELETE", "clients/"+d.Id(), nil)
+		if err != nil {
+			return fmt.Errorf("Request error: %s", err)
+		}
 
-	_, err = client.Do(req, nil)
-	if err != nil {
-		return fmt.Errorf("Error deleting client: %s", err)
+		_, err = client.Do(req, nil)
+		if err != nil {
+			return fmt.Errorf("Error deleting client: %s", err)
+		}
 	}
-
 	return nil
 }

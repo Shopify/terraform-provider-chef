@@ -20,7 +20,7 @@ func (c *Config) Client() (*chefGo.Client, error) {
 		Name:    c.Name,
 		Key:     string(key),
 		BaseURL: c.BaseURL,
-		SkipSSL: true,
+		SkipSSL: false,
 	}
 
 	return chefGo.NewClient(&config)

@@ -40,19 +40,24 @@ func resourceChefNode() *schema.Resource {
 			},
 
 			"attributes": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "{}",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "{}",
+				InputDefault: "{}",
+				ValidateFunc: func(v interface{}, k string) (warnings []string, errors []error) {
+					if _, err := readAttributes(v.(string)); err != nil {
+						errors = append(errors, err)
+					}
+					return
+				},
 			},
 		},
 	}
 }
 
-func readAttributes(d *schema.ResourceData) (map[string]interface{}, error) {
-	var attributes map[string]interface{}
-	attributes_str := d.Get("attributes").(string)
-	decoder := json.NewDecoder(strings.NewReader(attributes_str))
-	if err := decoder.Decode(&attributes); err != nil {
+func readAttributes(v string) (attributes map[string]interface{}, err error) {
+	decoder := json.NewDecoder(strings.NewReader(v))
+	if err = decoder.Decode(&attributes); err != nil {
 		return nil, err
 	}
 	return attributes, nil
@@ -63,7 +68,7 @@ func resourceChefNodeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	name := d.Get("name").(string)
 	environment := d.Get("environment").(string)
-	attributes, err := readAttributes(d)
+	attributes, err := readAttributes(d.Get("attributes").(string))
 	if err != nil {
 		return err
 	}
@@ -125,7 +130,7 @@ func resourceChefNodeRead(d *schema.ResourceData, meta interface{}) error {
 func resourceChefNodeUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*chefGo.Client)
 
-	attributes, err := readAttributes(d)
+	attributes, err := readAttributes(d.Get("attributes").(string))
 	if err != nil {
 		return err
 	}

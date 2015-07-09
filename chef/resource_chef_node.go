@@ -1,8 +1,10 @@
 package chef
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 
 	chefGo "github.com/go-chef/chef"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -38,11 +40,22 @@ func resourceChefNode() *schema.Resource {
 			},
 
 			"attributes": &schema.Schema{
-				Type:     schema.TypeMap,
+				Type:     schema.TypeString,
 				Optional: true,
+				Default:  "{}",
 			},
 		},
 	}
+}
+
+func readAttributes(d *schema.ResourceData) (map[string]interface{}, error) {
+	var attributes map[string]interface{}
+	attributes_str := d.Get("attributes").(string)
+	decoder := json.NewDecoder(strings.NewReader(attributes_str))
+	if err := decoder.Decode(&attributes); err != nil {
+		return nil, err
+	}
+	return attributes, nil
 }
 
 func resourceChefNodeCreate(d *schema.ResourceData, meta interface{}) error {
@@ -50,7 +63,10 @@ func resourceChefNodeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	name := d.Get("name").(string)
 	environment := d.Get("environment").(string)
-	attributes := d.Get("attributes").(map[string]interface{})
+	attributes, err := readAttributes(d)
+	if err != nil {
+		return err
+	}
 
 	var run_list []string
 	schema_run_list := d.Get("run_list").(interface{})
@@ -73,7 +89,7 @@ func resourceChefNodeCreate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] node create configuration: %#v", node)
 
-	_, err := client.Nodes.Post(node)
+	_, err = client.Nodes.Post(node)
 	if err != nil {
 		return fmt.Errorf("Error creating chef node: %s", err)
 	}
@@ -109,7 +125,10 @@ func resourceChefNodeRead(d *schema.ResourceData, meta interface{}) error {
 func resourceChefNodeUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*chefGo.Client)
 
-	attributes := d.Get("attributes").(map[string]interface{})
+	attributes, err := readAttributes(d)
+	if err != nil {
+		return err
+	}
 
 	updateNode := &chefGo.Node{
 		NormalAttributes:    attributes,
@@ -136,7 +155,7 @@ func resourceChefNodeUpdate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] node update configuration: %#v", updateNode)
 
-	_, err := client.Nodes.Put(*updateNode)
+	_, err = client.Nodes.Put(*updateNode)
 	if err != nil {
 		return fmt.Errorf("Failed to update node: %s", err)
 	}

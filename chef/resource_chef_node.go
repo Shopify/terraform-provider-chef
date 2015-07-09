@@ -113,7 +113,14 @@ func resourceChefNodeRead(d *schema.ResourceData, meta interface{}) error {
 
 	node, err := client.Nodes.Get(d.Id())
 	if err != nil {
-		return fmt.Errorf("Error reading chef node: %s", err)
+		if err.(*chefGo.ErrorResponse).Response.StatusCode == 404 {
+			// If the node doesn't exist, that's okay! Set the Id to an empty string
+			// and terraform will happily recreate it on the next apply
+			d.SetId("")
+			return nil
+		} else {
+			return fmt.Errorf("Error reading chef node: %s", err)
+		}
 	}
 
 	schema_run_list := make([]interface{}, 0)

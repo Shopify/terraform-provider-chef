@@ -25,7 +25,8 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"chef_node": resourceChefNode(),
+			"chef_node":   resourceChefNode(),
+			"chef_client": resourceChefClient(),
 		},
 
 		ConfigureFunc: providerConfigure,

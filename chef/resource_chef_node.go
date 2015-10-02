@@ -184,19 +184,5 @@ func resourceChefNodeDelete(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return fmt.Errorf("Error deleting node: %s", err)
 	}
-
-	_, err = client.Clients.Get(d.Id())
-	if err == nil {
-		// This should check if the client actually exists before it tries to delete it
-		req, err := client.NewRequest("DELETE", "clients/"+d.Id(), nil)
-		if err != nil {
-			return fmt.Errorf("Request error: %s", err)
-		}
-
-		_, err = client.Do(req, nil)
-		if err != nil {
-			return fmt.Errorf("Error deleting client: %s", err)
-		}
-	}
 	return nil
 }
